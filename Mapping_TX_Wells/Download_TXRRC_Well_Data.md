@@ -1,4 +1,4 @@
-==**Downloading Well Data from the Texas Railroad Commission**==
+**Downloading Well Data from the Texas Railroad Commission**
 
 **1. The easiest way to find your county number is to go to the [TX RRC public GIS viewer](https://gis.rrc.texas.gov/GISViewer/). This is also a great place to see your well data before you download it**. 
 
@@ -21,9 +21,7 @@
 
 ![](https://i.imgur.com/3wiN3ul.jpg)
 
-**5. We will do the same for the API data. This is the extra information about (most of) the wells listed in the shapefile in a format called DBF. If you import a DBF file into a GIS program like ArcGIS or QGIS, it will read it as a table. 
-
-    We will be using the columns "plugged date" and "completion" to choose our wells. When a well is [plugged](https://www.osha.gov/SLTC/etools/oilandgas/abandoning_well/abandoning.html), it is no longer active. When it is [completed](https://www.rigzone.com/training/insight.asp?insight_id=326&c_id=), it is ready to produce oil or gas.**
+**5. We will do the same for the API data. This is the extra information about (most of) the wells listed in the shapefile in a format called DBF. If you import a DBF file into a GIS program like ArcGIS or QGIS, it will read it as a table. We will be using the columns "plugged date" and "completion" to choose our wells. When a well is [plugged](https://www.osha.gov/SLTC/etools/oilandgas/abandoning_well/abandoning.html), it is no longer active. When it is [completed](https://www.rigzone.com/training/insight.asp?insight_id=326&c_id=), it is ready to produce oil or gas.**
 
 ![](https://i.imgur.com/mCqBpBU.jpg)
 
