@@ -1,4 +1,4 @@
-**Downloading Well Data from the Texas Railroad Commission**
+# Downloading Well Data from the Texas Railroad Commission
 
 **1. The easiest way to find your county number is to go to the [TX RRC public GIS viewer](https://gis.rrc.texas.gov/GISViewer/). This is also a great place to see your well data before you download it**. 
 
@@ -25,14 +25,13 @@
 
 ![](https://i.imgur.com/mCqBpBU.jpg)
 
-**6. Download your DBF file using the county number and extract it.
-**
+**6. Download your DBF file using the county number and extract it.**
+
 ![](https://i.imgur.com/FT9A0Hj.jpg)
 
 ![](https://i.imgur.com/vNA2Jee.jpg)
 
 
-**Next, we will work with this data using ArcGIS. 
-**
+**Next, we will work with this data using ArcGIS. **
 
 
