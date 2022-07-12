@@ -1,0 +1,466 @@
+---
+title: "VOC Weather Station Data (Wunderground Scraper)"
+author: "Lourdes Vera"
+date: "2/13/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+This script does NOT work. It did at the time it was written.
+
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#each line installs a package that will be needed to scrape the data
+#install.packages('tidyverse')
+#install.packages('rvest')
+#install.packages('datetime')
+#install.packages('vctrs')
+```
+```{r}
+#Load the packages you installed
+library(tidyverse)
+library(datetime)
+library(rvest)
+library(vctrs)
+```
+#Create Dataframe of Dates
+```{r}
+#this is the list of days where you sampled data
+data <- as.data.frame(c("2020-02-23", "2020-02-24", "2020-02-25", "2020-02-26", "2020-02-27", "2020-02-28", "2020-02-29", "2020-03-01", "2020-03-02", "2020-03-03", "2020-03-04", "2020-03-05", "2020-03-06", "2020-03-07", "2020-03-08", "2020-03-09","2020-03-10","2020-03-11","2020-03-12","2020-03-13","2020-03-14","2020-03-15","2020-03-16","2020-03-17","2020-03-18","2020-03-19","2020-03-20","2020-03-21","2020-03-22","2020-03-23","2020-03-24","2020-03-25","2020-03-26","2020-03-27","2020-03-28","2020-03-29","2020-03-30","2020-03-31","2020-04-01","2020-04-02","2020-04-03","2020-04-04","2020-04-05", "2020-04-06", "2020-04-07", "2020-04-08", "2020-04-09", "2020-04-10", "2020-04-11", "2020-04-12",  "2020-04-13", "2020-04-14", "2020-04-15", "2020-04-16", "2020-04-17", "2020-04-18", "2020-04-19", "2020-04-20", "2020-04-21", "2020-04-22", "2020-04-23", "2020-04-24","2020-04-25", "2020-04-26", "2020-04-27", "2020-04-28", "2020-04-29", "2020-04-30", "2020-05-01", "2020-05-02", "2020-05-03",  "2020-05-04", "2020-07-21", "2020-07-22", "2020-07-23", "2020-07-24", "2020-07-25", "2020-07-26", "2020-07-27", "2020-07-28", "2020-07-29", "2020-07-30", "2020-07-31", "2020-08-01", "2020-08-02", "2020-08-03", "2020-08-04", "2021-01-12", "2021-01-13", "2021-01-14", "2021-01-15", "2021-01-16", "2021-01-17", "2021-01-18", "2021-01-19", "2021-01-20", "2021-01-21", "2021-01-22", "2021-01-23", "2021-01-24" ))
+```
+#Generate URLS
+```{r}
+#Paste each data into the URL to get a URL that directly takes you to the webpage for each day
+urls<-NA
+for (i in 1:nrow(data)){
+  urls[i] <- paste0("https://www.wunderground.com/dashboard/pws/KTXKARNE7/table/",data[i,1],"/",data[i,1],"/daily")
+}
+
+head(urls)
+length(urls)
+```
+#Scrape Data from Wunderground (takes a long time)
+^ This step does not work
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 1:100){ #100 is the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+#Save Each Date as a Dataframe
+```{r}
+#Assign each set of data from the webpage to a data frame
+'DF2020-02-23' <- as.data.frame(`DF2020-02-23`)
+'DF2020-02-24' <- as.data.frame(`DF2020-02-24`) 
+'DF2020-02-25' <- as.data.frame(`DF2020-02-25`)
+'DF2020-02-26' <- as.data.frame(`DF2020-02-26`)
+'DF2020-02-27' <- as.data.frame(`DF2020-02-27`)
+'DF2020-02-28' <- as.data.frame(`DF2020-02-28`)
+'DF2020-02-29' <- as.data.frame(`DF2020-02-29`)
+'DF2020-03-01' <- as.data.frame(`DF2020-03-01`)
+'DF2020-03-02' <- as.data.frame(`DF2020-03-02`)
+'DF2020-03-03' <- as.data.frame(`DF2020-03-03`)
+'DF2020-03-04' <- as.data.frame(`DF2020-03-04`)
+'DF2020-03-05' <- as.data.frame(`DF2020-03-05`)
+'DF2020-03-06' <- as.data.frame(`DF2020-03-06`)
+'DF2020-03-07' <- as.data.frame(`DF2020-03-07`)
+'DF2020-03-08' <- as.data.frame(`DF2020-03-08`)
+'DF2020-03-09' <- as.data.frame(`DF2020-03-09`)
+'DF2020-03-10' <- as.data.frame(`DF2020-03-10`)
+'DF2020-03-11' <- as.data.frame(`DF2020-03-11`)
+'DF2020-03-12' <- as.data.frame(`DF2020-03-12`)
+'DF2020-03-13' <- as.data.frame(`DF2020-03-13`)
+'DF2020-03-14' <- as.data.frame(`DF2020-03-14`)
+'DF2020-03-15' <- as.data.frame(`DF2020-03-15`)
+'DF2020-03-16' <- as.data.frame(`DF2020-03-16`)
+'DF2020-03-17' <- as.data.frame(`DF2020-03-17`)
+'DF2020-03-18' <- as.data.frame(`DF2020-03-18`)
+'DF2020-03-19' <- as.data.frame(`DF2020-03-19`)
+'DF2020-03-20' <- as.data.frame(`DF2020-03-20`)
+'DF2020-03-21' <- as.data.frame(`DF2020-03-21`)
+'DF2020-03-22' <- as.data.frame(`DF2020-03-22`)
+'DF2020-03-23' <- as.data.frame(`DF2020-03-23`)
+'DF2020-03-24' <- as.data.frame(`DF2020-03-24`)
+'DF2020-03-25' <- as.data.frame(`DF2020-03-25`)
+'DF2020-03-26' <- as.data.frame(`DF2020-03-26`)
+'DF2020-03-27' <- as.data.frame(`DF2020-03-27`)
+'DF2020-03-28' <- as.data.frame(`DF2020-03-28`)
+'DF2020-03-29' <- as.data.frame(`DF2020-03-29`)
+'DF2020-03-30' <- as.data.frame(`DF2020-03-30`)
+'DF2020-03-31' <- as.data.frame(`DF2020-03-31`)
+'DF2020-04-01' <- as.data.frame(`DF2020-04-01`)
+'DF2020-04-02' <- as.data.frame(`DF2020-04-02`)
+'DF2020-04-03' <- as.data.frame(`DF2020-04-03`)
+'DF2020-04-04' <- as.data.frame(`DF2020-04-04`)
+'DF2020-04-05' <- as.data.frame(`DF2020-04-05`)
+'DF2020-04-06' <- as.data.frame(`DF2020-04-06`)
+'DF2020-04-07' <- as.data.frame(`DF2020-04-07`)
+'DF2020-04-08' <- as.data.frame(`DF2020-04-08`)
+'DF2020-04-09' <- as.data.frame(`DF2020-04-09`)
+'DF2020-04-10' <- as.data.frame(`DF2020-04-10`)
+'DF2020-04-11' <- as.data.frame(`DF2020-04-11`)
+'DF2020-04-12' <- as.data.frame(`DF2020-04-12`)
+'DF2020-04-13' <- as.data.frame(`DF2020-04-13`)
+'DF2020-04-14' <- as.data.frame(`DF2020-04-14`)
+'DF2020-04-15' <- as.data.frame(`DF2020-04-15`)
+'DF2020-04-16' <- as.data.frame(`DF2020-04-16`)
+'DF2020-04-17' <- as.data.frame(`DF2020-04-17`)
+'DF2020-04-18' <- as.data.frame(`DF2020-04-18`)
+'DF2020-04-19' <- as.data.frame(`DF2020-04-19`)
+'DF2020-04-20' <- as.data.frame(`DF2020-04-20`)
+'DF2020-04-21' <- as.data.frame(`DF2020-04-21`)
+'DF2020-04-22' <- as.data.frame(`DF2020-04-22`)
+'DF2020-04-23' <- as.data.frame(`DF2020-04-23`)
+'DF2020-04-24' <- as.data.frame(`DF2020-04-24`)
+'DF2020-04-25' <- as.data.frame(`DF2020-04-25`)
+'DF2020-04-26' <- as.data.frame(`DF2020-04-26`)
+'DF2020-04-27' <- as.data.frame(`DF2020-04-27`)
+'DF2020-04-28' <- as.data.frame(`DF2020-04-28`)
+'DF2020-04-29' <- as.data.frame(`DF2020-04-29`)
+'DF2020-04-30' <- as.data.frame(`DF2020-04-30`)
+'DF2020-05-01' <- as.data.frame(`DF2020-05-01`)
+'DF2020-05-02' <- as.data.frame(`DF2020-05-02`)
+'DF2020-05-03' <- as.data.frame(`DF2020-05-03`)
+'DF2020-05-04' <- as.data.frame(`DF2020-05-04`)
+'DF2020-07-21' <- as.data.frame(`DF2020-07-21`)
+'DF2020-07-22' <- as.data.frame(`DF2020-07-22`)
+'DF2020-07-23' <- as.data.frame(`DF2020-07-23`)
+'DF2020-07-24' <- as.data.frame(`DF2020-07-24`)
+'DF2020-07-25' <- as.data.frame(`DF2020-07-25`)
+'DF2020-07-26' <- as.data.frame(`DF2020-07-26`)
+'DF2020-07-27' <- as.data.frame(`DF2020-07-27`)
+'DF2020-07-28' <- as.data.frame(`DF2020-07-28`)
+'DF2020-07-29' <- as.data.frame(`DF2020-07-29`)
+'DF2020-07-30' <- as.data.frame(`DF2020-07-30`)
+'DF2020-07-31' <- as.data.frame(`DF2020-07-31`)
+'DF2020-08-01' <- as.data.frame(`DF2020-08-01`)
+'DF2020-08-02' <- as.data.frame(`DF2020-08-02`)
+'DF2020-08-03' <- as.data.frame(`DF2020-08-03`)
+'DF2020-08-04' <- as.data.frame(`DF2020-08-04`)
+'DF2021-01-12' <- as.data.frame(`DF2021-01-12`)
+'DF2021-01-13' <- as.data.frame(`DF2021-01-13`)
+'DF2021-01-14' <- as.data.frame(`DF2021-01-14`)
+'DF2021-01-15' <- as.data.frame(`DF2021-01-15`)
+'DF2021-01-16' <- as.data.frame(`DF2021-01-16`)
+'DF2021-01-17' <- as.data.frame(`DF2021-01-17`)
+'DF2021-01-18' <- as.data.frame(`DF2021-01-18`)
+'DF2021-01-19' <- as.data.frame(`DF2021-01-19`)
+'DF2021-01-20' <- as.data.frame(`DF2021-01-20`)
+'DF2021-01-21' <- as.data.frame(`DF2021-01-21`)
+'DF2021-01-22' <- as.data.frame(`DF2021-01-22`)
+'DF2021-01-23' <- as.data.frame(`DF2021-01-23`)
+'DF2021-01-24' <- as.data.frame(`DF2021-01-24`)
+```
+
+```{r}
+#add dates as data frame columns
+`DF2020-02-23`$date <- "2020-02-23"
+`DF2020-02-24`$date <- "2020-02-24"
+`DF2020-02-25`$date <- "2020-02-25"
+`DF2020-02-26`$date <- "2020-02-26"
+`DF2020-02-27`$date <- "2020-02-27"
+`DF2020-02-28`$date <- "2020-02-28"
+`DF2020-02-29`$date <- "2020-02-29"
+`DF2020-03-01`$date <- "2020-03-01"
+`DF2020-03-02`$date <- "2020-03-02"
+`DF2020-03-03`$date <- "2020-03-03"
+`DF2020-03-04`$date <- "2020-03-04"
+`DF2020-03-05`$date <- "2020-03-05"
+`DF2020-03-06`$date <- "2020-03-06"
+`DF2020-03-07`$date <- "2020-03-07"
+`DF2020-03-08`$date <- "2020-03-08"
+`DF2020-03-09`$date <- "2020-03-09"
+`DF2020-03-10`$date <- "2020-03-10"
+`DF2020-03-11`$date <- "2020-03-11"
+`DF2020-03-12`$date <- "2020-03-12"
+`DF2020-03-13`$date <- "2020-03-13"
+`DF2020-03-14`$date <- "2020-03-14"
+`DF2020-03-15`$date <- "2020-03-15"
+`DF2020-03-16`$date <- "2020-03-16"
+`DF2020-03-17`$date <- "2020-03-17"
+`DF2020-03-18`$date <- "2020-03-18"
+`DF2020-03-19`$date <- "2020-03-19"
+`DF2020-03-20`$date <- "2020-03-20"
+`DF2020-03-21`$date <- "2020-03-21"
+`DF2020-03-22`$date <- "2020-03-22"
+`DF2020-03-23`$date <- "2020-03-23"
+`DF2020-03-24`$date <- "2020-03-24"
+`DF2020-03-25`$date <- "2020-03-25"
+`DF2020-03-26`$date <- "2020-03-26"
+`DF2020-03-27`$date <- "2020-03-27"
+`DF2020-03-28`$date <- "2020-03-28"
+`DF2020-03-29`$date <- "2020-03-29"
+`DF2020-03-30`$date <- "2020-03-30"
+`DF2020-03-31`$date <- "2020-03-31"
+`DF2020-04-01`$date <- "2020-04-01"
+`DF2020-04-02`$date <- "2020-04-02"
+`DF2020-04-03`$date <- "2020-04-03"
+`DF2020-04-04`$date <- "2020-04-04"
+`DF2020-04-05`$date <- "2020-04-05"
+`DF2020-04-06`$date <- "2020-04-06"
+`DF2020-04-07`$date <- "2020-04-07"
+`DF2020-04-08`$date <- "2020-04-08"
+`DF2020-04-09`$date <- "2020-04-09"
+`DF2020-04-10`$date <- "2020-04-10"
+`DF2020-04-11`$date <- "2020-04-11"
+`DF2020-04-12`$date <- "2020-04-12"
+`DF2020-04-13`$date <- "2020-04-13"
+`DF2020-04-14`$date <- "2020-04-14"
+`DF2020-04-15`$date <- "2020-04-15"
+`DF2020-04-16`$date <- "2020-04-16"
+`DF2020-04-17`$date <- "2020-04-17"
+`DF2020-04-18`$date <- "2020-04-18"
+`DF2020-04-19`$date <- "2020-04-19"
+`DF2020-04-20`$date <- "2020-04-20"
+`DF2020-04-21`$date <- "2020-04-21"
+`DF2020-04-22`$date <- "2020-04-22"
+`DF2020-04-23`$date <- "2020-04-23"
+`DF2020-04-24`$date <- "2020-04-24"
+`DF2020-04-25`$date <- "2020-04-25"
+`DF2020-04-26`$date <- "2020-04-26"
+`DF2020-04-27`$date <- "2020-04-27"
+`DF2020-04-28`$date <- "2020-04-28"
+`DF2020-04-29`$date <- "2020-04-29"
+`DF2020-04-30`$date <- "2020-04-30"
+`DF2020-05-01`$date <- "2020-05-01"
+`DF2020-05-02`$date <- "2020-05-02"
+`DF2020-05-03`$date <- "2020-05-03"
+`DF2020-05-04`$date <- "2020-05-04"
+`DF2020-07-21`$date <- "2020-07-21"
+`DF2020-07-22`$date <- "2020-07-22"
+`DF2020-07-23`$date <- "2020-07-23"
+`DF2020-07-24`$date <- "2020-07-24"
+`DF2020-07-25`$date <- "2020-07-25"
+`DF2020-07-26`$date <- "2020-07-26"
+`DF2020-07-27`$date <- "2020-07-27"
+`DF2020-07-28`$date <- "2020-07-28"
+`DF2020-07-29`$date <- "2020-07-29"
+`DF2020-07-30`$date <- "2020-07-30"
+`DF2020-07-31`$date <- "2020-07-31"
+`DF2020-08-01`$date <- "2020-08-01"
+`DF2020-08-02`$date <- "2020-08-02"
+`DF2020-08-03`$date <- "2020-08-03"
+`DF2020-08-04`$date <- "2020-08-04"
+`DF2021-01-12`$date <- "2021-01-12"
+`DF2021-01-13`$date <- "2021-01-13"
+`DF2021-01-14`$date <- "2021-01-14"
+`DF2021-01-15`$date <- "2021-01-15"
+`DF2021-01-16`$date <- "2021-01-16"
+`DF2021-01-17`$date <- "2021-01-17"
+`DF2021-01-18`$date <- "2021-01-18"
+`DF2021-01-19`$date <- "2021-01-19"
+`DF2021-01-20`$date <- "2021-01-20"
+`DF2021-01-21`$date <- "2021-01-21"
+`DF2021-01-22`$date <- "2021-01-22"
+`DF2021-01-23`$date <- "2021-01-23"
+`DF2021-01-24`$date <- "2021-01-24"
+```
+#Build the main dataframe
+```{r}
+#combine the data frames together
+DF_All <- vctrs::vec_c(`DF2020-02-23`, 
+`DF2020-02-24`,
+`DF2020-02-25`,
+`DF2020-02-26`,
+`DF2020-02-27`,
+`DF2020-02-28`,
+`DF2020-02-29`,
+`DF2020-03-01`,
+`DF2020-03-02`,
+`DF2020-03-03`,
+`DF2020-03-04`,
+`DF2020-03-05`,
+`DF2020-03-06`,
+`DF2020-03-07`,
+`DF2020-03-08`,
+`DF2020-03-09`,
+`DF2020-03-10`,
+`DF2020-03-11`,
+`DF2020-03-12`,
+`DF2020-03-13`,
+`DF2020-03-14`,
+`DF2020-03-15`,
+`DF2020-03-16`,
+`DF2020-03-17`,
+`DF2020-03-18`,
+`DF2020-03-19`,
+`DF2020-03-20`,
+`DF2020-03-21`,
+`DF2020-03-22`,
+`DF2020-03-23`,
+`DF2020-03-24`,
+`DF2020-03-25`,
+`DF2020-03-26`,
+`DF2020-03-27`,
+`DF2020-03-28`,
+`DF2020-03-29`,
+`DF2020-03-30`,
+`DF2020-03-31`,
+`DF2020-04-01`,
+`DF2020-04-02`,
+`DF2020-04-03`,
+`DF2020-04-04`,
+`DF2020-04-05`,
+`DF2020-04-06`,
+`DF2020-04-07`,
+`DF2020-04-08`,
+`DF2020-04-09`,
+`DF2020-04-10`,
+`DF2020-04-11`,
+`DF2020-04-12`,
+`DF2020-04-13`,
+`DF2020-04-14`,
+`DF2020-04-15`,
+`DF2020-04-16`,
+`DF2020-04-17`,
+`DF2020-04-18`,
+`DF2020-04-19`,
+`DF2020-04-20`,
+`DF2020-04-21`,
+`DF2020-04-22`,
+`DF2020-04-23`,
+`DF2020-04-24`,
+`DF2020-04-25`,
+`DF2020-04-26`,
+`DF2020-04-27`,
+`DF2020-04-28`,
+`DF2020-04-29`,
+`DF2020-04-30`,
+`DF2020-05-01`,
+`DF2020-05-02`,
+`DF2020-05-03`,
+`DF2020-05-04`,
+`DF2020-07-21`,
+`DF2020-07-22`,
+`DF2020-07-23`,
+`DF2020-07-24`,
+`DF2020-07-25`,
+`DF2020-07-26`,
+`DF2020-07-27`,
+`DF2020-07-28`,
+`DF2020-07-29`,
+`DF2020-07-30`,
+`DF2020-07-31`,
+`DF2020-08-01`,
+`DF2020-08-02`,
+`DF2020-08-03`,
+`DF2020-08-04`,
+`DF2021-01-12`,
+`DF2021-01-13`,
+`DF2021-01-14`,
+`DF2021-01-15`,
+`DF2021-01-16`,
+`DF2021-01-17`,
+`DF2021-01-18`,
+`DF2021-01-19`,
+`DF2021-01-20`,
+`DF2021-01-21`,
+`DF2021-01-22`,
+`DF2021-01-23`,
+`DF2021-01-24`)
+```
+```{r}
+#check out your new data frame. Make sure the dates are in there.
+DF_All
+```
+#Format date and time
+```{r}
+#format the date and time
+DF_All$Date <- as.date(DF_All$date)
+
+DF_All$Time2 <- format(strptime(DF_All$Time, "%I:%M %p"), format = "%H:%M:%S")
+```
+```{r}
+#concatenate date and time
+DF_All$Datetime <- paste0(DF_All$Date, " ", DF_All$Time2)
+```
+```{r}
+DF_All$Datetime <- as.POSIXct(DF_All$Datetime, format="%Y-%m-%d%H:%M", tz = "America/Chicago")
+```
+```{r}
+DF_All$Datetime <- round(DF_All$Datetime, "hours")
+```
+#Format Weather Data
+```{r}
+#Wind direction
+DF_All$WindNumber <- NA
+DF_All[which(DF_All$Wind == "East"),c("WindNumber")] <- 90
+DF_All[which(DF_All$Wind == "West"),c("WindNumber")] <- 270
+DF_All[which(DF_All$Wind == "WNW"),c("WindNumber")] <- 292.5
+DF_All[which(DF_All$Wind == "NW"),c("WindNumber")] <- 315
+DF_All[which(DF_All$Wind == "North"),c("WindNumber")] <- 0
+DF_All[which(DF_All$Wind == "NE"),c("WindNumber")] <- 45
+DF_All[which(DF_All$Wind == "ENE"),c("WindNumber")] <- 67.5
+DF_All[which(DF_All$Wind == "South"),c("WindNumber")] <- 180
+DF_All[which(DF_All$Wind == "SE"),c("WindNumber")] <- 135
+DF_All[which(DF_All$Wind == "SSE"),c("WindNumber")] <- 157.5
+DF_All[which(DF_All$Wind == "SSW"),c("WindNumber")] <- 202.5
+DF_All[which(DF_All$Wind == "ESE"),c("WindNumber")] <- 112.5
+DF_All[which(DF_All$Wind == "WSW"),c("WindNumber")] <- 247.5
+DF_All[which(DF_All$Wind == "NNE"),c("WindNumber")] <- 22.5
+DF_All[which(DF_All$Wind == "NNW"),c("WindNumber")] <- 337.5
+DF_All[which(DF_All$Wind == "SW"),c("WindNumber")] <- 225
+
+#make wind direction numeric
+DF_All$WindNumber <- as.numeric(DF_All$WindNumber)
+```
+```{r}
+#temperature
+DF_All$Temperature <- str_sub(DF_All$Temperature, start=1, end=4)
+DF_All$Temperature <- as.numeric(DF_All$Temperature)
+#humidity
+DF_All$Humidity <- str_sub(DF_All$Humidity, start=1, end=2)
+DF_All$Humidity <- as.numeric(DF_All$Humidity)
+#windspeed
+DF_All$Speed <- str_sub(DF_All$Temperature, start=1, end=3)
+DF_All$Speed <- as.numeric(DF_All$Speed)
+summary(DF_All)
+```
+#Keep complete data
+```{r}
+#only rows without missing values
+DF_All <- DF_All[complete.cases(DF_All),]
+```
+#
+```{r}
+dfwinddatetime <- DF_All %>% group_by(Datetime) %>%
+  summarise(mean = mean(WindNumber))
+```
+
+```{r}
+#Wind direction
+dfwinddatetime$Wind <- "NA"
+dfwinddatetime[which(dfwinddatetime$mean >= 0 & dfwinddatetime$mean < 22.5| dfwinddatetime$mean >= 337.5 & dfwinddatetime$mean <= 360),c("Wind")] <- "North"
+dfwinddatetime[which(dfwinddatetime$mean >= 22.5 & dfwinddatetime$mean < 67.5),c("Wind")] <- "NE"
+dfwinddatetime[which(dfwinddatetime$mean >= 67.5 & dfwinddatetime$mean < 112.5),c("Wind")] <- "East"
+dfwinddatetime[which(dfwinddatetime$mean >= 112.5 & dfwinddatetime$mean < 157.5),c("Wind")] <- "SE"
+dfwinddatetime[which(dfwinddatetime$mean >= 157.5 & dfwinddatetime$mean < 202.5),c("Wind")] <- "South"
+dfwinddatetime[which(dfwinddatetime$mean >= 202.5 & dfwinddatetime$mean < 247.5),c("Wind")] <- "SW"
+dfwinddatetime[which(dfwinddatetime$mean >= 247.5 & dfwinddatetime$mean < 292.5),c("Wind")] <- "West"
+dfwinddatetime[which(dfwinddatetime$mean >= 292.5 & dfwinddatetime$mean < 337.5),c("Wind")] <- "NW"
+```
+
+```{r}
+write.csv(dfwinddatetime, "dfwinddatetime.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

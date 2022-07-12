@@ -1,0 +1,138 @@
+---
+title: "Black_Carbon_Analysis"
+author: "Lourdes Vera"
+date: "4/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(openair)
+```
+
+```{r}
+weather <- read.csv("dfwinddatetime_BlackCarbon.csv", stringsAsFactors = FALSE)
+df <- read.csv("OutdoorResults.csv", stringsAsFactors = FALSE)
+```
+```{r}
+head(weather)
+```
+```{r}
+head(df)
+```
+```{r}
+str(df)
+```
+
+
+```{r}
+df$Datetime <- as.POSIXct(df$TimeStamp, format="%m/%d/%Y%H:%M")
+df$Datetime[1:6]
+
+weather$Datetime <- as.POSIXct(weather$Datetime, format="%Y-%m-%d%H:%M")
+weather$Datetime[1:6]
+```
+```{r}
+#get rid of timezone 
+strip.tz <- function(dt) {
+  fmt <- "%Y-%m-%d %H:%M:%S"
+  strptime(strftime(dt, format = fmt, tz=""), format = fmt, tz="UTC")
+}
+
+df$Datetime <- strip.tz(df$Datetime)
+weather$Datetime <- strip.tz(weather$Datetime)
+```
+
+```{r}
+str(df$Datetime)
+str(weather$Datetime)
+```
+## Round date time in full data to hours
+```{r}
+df$Datetime <- round(df$Datetime,"hours")
+```
+```{r}
+df$Datetime[1:6]
+weather$Datetime[1:6]
+```
+```{r}
+bc <- merge(weather, df, by = 'Datetime')
+```
+```{r}
+bc$Datetime <- as.POSIXct(bc$Datetime, format="%Y-%m-%d%H:%M")
+```
+```{r}
+head(bc)
+```
+
+```{r}
+bcsummer <- bc[which(bc$Season=="Summer"),]
+```
+```{r}
+str(bcsummer)
+```
+
+
+```{r}
+ggplot(bcsummer, aes(x = Datetime, y = BC, col=Wind)) + geom_point() +theme_classic() + ggtitle("Summer Black Carbon Concentrations over Time and Wind Direction") + ylab("Black Carbon ug/m^3") + xlab('Date')
+```
+
+```{r}
+windRose(bcsummer, ws = "ws", wd = "wd", ws2 = NA, wd2 = NA, 
+  ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 4, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = "BC", annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+pollutionRose(bcsummer, pollutant = "BC")
+
+```
+##Winter Black Carbon Graph
+
+```{r}
+#Select the Black Carbon Data for Winter
+bcwinter <- bc[which(bc$Season=="Winter"),]
+```
+```{r}
+str(bcwinter)
+```
+
+```{r}
+#Make the Black Carbon graph for Winter
+ggplot(bcwinter, aes(x = Datetime, y = BC, col=Wind)) + geom_point() +theme_classic() + ggtitle("Winter Black Carbon Concentrations over Time and Wind Direction") + ylab("Black Carbon ug/m^3") + xlab('Date') + scale_y_continuous(limits=c(0, 65))
+```
+
+
+```{r}
+windRose(bcwinter, ws = "ws", wd = "wd", ws2 = NA, wd2 = NA, 
+  ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 4, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = "BC", annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+pollutionRose(bcwinter, pollutant = "BC")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
