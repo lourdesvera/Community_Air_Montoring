@@ -1,0 +1,180 @@
+---
+title: "TCEQ Monitor Data Analysis: VOC Averages and Wind Roses"
+author: "Lourdes Vera"
+date: "4/13/2021"
+output: word_document
+---
+# TCEQ Monitor VOC and Meteorological Data Analysis
+** Script to Analyze Volatile Organic Compound and Meteorological Data from the TCEQ Monitor** 
+This chunk allows me to knit this script to PDF
+```{r setup, include=FALSE}
+#Knit script to PDF
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+```{r}
+#load packages
+library(tidyverse)
+library(plyr)
+library(openair)
+library(ggplot2)
+```
+```{r}
+data <- read.delim("TCEQData.txt", sep = ",", skip = 10)
+```
+```{r}
+data$Value <- as.numeric(data$Value)
+```
+https://www.tceq.texas.gov/cgi-bin/compliance/monops/agc_amcvs.pl 
+```{r}
+data[which(data$Parameter.Cd == "43233" & data$Value == 0.00000), c("Value")] <- (0.05/2)
+data[which(data$Parameter.Cd == "43235" & data$Value == 0.00000), c("Value")] <- (0.04/2)
+data[which(data$Parameter.Cd == "43238" & data$Value == 0.00000), c("Value")] <- (0.04/2)
+data[which(data$Parameter.Cd == "45109" & data$Value == 0.00000), c("Value")] <- (0.05/2)
+data[which(data$Parameter.Cd == "45201" & data$Value == 0.00000), c("Value")] <- (0.07/2)
+data[which(data$Parameter.Cd == "45202" & data$Value == 0.00000), c("Value")] <- (0.06/2)
+data[which(data$Parameter.Cd == "45203" & data$Value == 0.00000), c("Value")] <- (0.05/2)
+data[which(data$Parameter.Cd == "45204" & data$Value == 0.00000), c("Value")] <- (0.05/2)
+data[which(data$Parameter.Cd == "45207" & data$Value == 0.00000), c("Value")] <- (0.04/2)
+data[which(data$Parameter.Cd == "45208" & data$Value == 0.00000), c("Value")] <- (0.04/2)
+data[which(data$Parameter.Cd == "45210" & data$Value == 0.00000), c("Value")] <- (0.04/2)
+data[which(data$Parameter.Cd == "45220" & data$Value == 0.00000), c("Value")] <- (0.05/2)
+data[which(data$Parameter.Cd == "45225" & data$Value == 0.00000), c("Value")] <- (0.04/2)
+```
+```{r}
+data$parameter <- as.factor(data$Parameter.Cd)
+```
+```{r}
+levels(data$parameter)
+```
+```{r}
+data$compound <- mapvalues(data$parameter, from = c("43233", "43235", "43238", "45109","45201", "45202", "45203", "45204", "45207", "45208", "45210", "45220", "45225", "61101", "61103", "61104"), to = c("n-Octane", "n-Nonane", "n-Decane", "mp-Xylene", "Benzene", "Toluene", "Ethylbenzene", "o-Xylene", "1,3,5-Trimethylbenzene","1,2,4-Trimethylbenzene", "Isopropylbenzene", "Styrene", "1,2,3-Trimethylbenzene", "Wind Speed-Scalar", "Wind Speed-Resultant", "Wind Direction-Resultant"))
+```
+```{r}
+levels(data$compound)
+```
+```{r}
+data$Date <- as.Date(paste(data$Date, "01", sep=""), "%Y%m%d")
+data$datetime <- as.POSIXct(paste(data$Date, data$Time), format="%Y-%m-%d %H:%M", tz="America/Chicago")
+```
+```{r}
+data$compound <- as.character(data$compound)
+data2 <- data[,c("compound", "Value", "datetime")]
+```
+```{r}
+data3 <- data2[!duplicated(data2),]
+```
+```{r}
+data4 <- spread(data3, compound, Value)
+```
+All rounds weather rose
+```{r}
+data5 <- data4[,c("datetime", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+colnames(data5) <- c("datetime", "ws","wd")
+windRose(data5, ws = "ws", wd = "wd", ws2 = NA, wd2 = NA, 
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 5, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale = 
+  315, border = NA)
+```
+#SEPARATE ROUNDS
+```{r}
+#Round1
+Round1_weather <- data4[data4$datetime>="2020-02-23 10:22:00" & data4$datetime<="2020-03-01 15:18:00",c("datetime", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+#round 3
+Round2_weather <- data4[data4$datetime>="2020-04-05 12:00:00" & data4$datetime<="2020-04-12 16:35:59",c("datetime", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+#round 4
+Round3_weather <- data4[data4$datetime>="2020-04-25 09:45:00" & data4$datetime<="2020-05-02 08:32:59",c("datetime", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+```
+```{r}
+colnames(Round1_weather) <- c("datetime", "ws","wd")
+windRose(Round1_weather, ws = "ws", wd = "wd", ws2 = NA, wd2 = NA, 
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 5, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale = 
+  315, border = NA)
+```
+```{r}
+colnames(Round2_weather) <- c("datetime", "ws","wd")
+windRose(Round2_weather, ws = "ws", wd = "wd", ws2 = NA, wd2 = NA, 
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 5, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale = 
+  315, border = NA)
+```
+```{r}
+colnames(Round3_weather) <- c("datetime", "ws","wd")
+windRose(Round3_weather, ws = "ws", wd = "wd", ws2 = NA, wd2 = NA, 
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 5, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale = 
+  315, border = NA)
+```
+#SEPARATE ROUNDS VOCs
+```{r}
+#Round1
+Round1_VOC <- data4[data4$datetime>="2020-02-23 10:22:00" & data4$datetime<="2020-03-01 15:18:00",c("datetime", "n-Octane", "n-Nonane", "n-Decane","mp-Xylene", "Benzene", "Toluene", "Ethylbenzene", "o-Xylene", "1,3,5-Trimethylbenzene","1,2,4-Trimethylbenzene", "Isopropylbenzene", "Styrene", "1,2,3-Trimethylbenzene", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+#round 3
+Round2_VOC <- data4[data4$datetime>="2020-04-05 12:00:00" & data4$datetime<="2020-04-12 16:35:59",c("datetime", "n-Octane", "n-Nonane", "n-Decane", "mp-Xylene", "Benzene", "Toluene", "Ethylbenzene", "o-Xylene", "1,3,5-Trimethylbenzene","1,2,4-Trimethylbenzene", "Isopropylbenzene", "Styrene", "1,2,3-Trimethylbenzene", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+#round 4
+Round3_VOC <- data4[data4$datetime>="2020-04-25 09:45:00" & data4$datetime<="2020-05-02 08:32:59",c("datetime", "n-Octane", "n-Nonane", "n-Decane", "mp-Xylene", "Benzene", "Toluene", "Ethylbenzene", "o-Xylene", "1,3,5-Trimethylbenzene","1,2,4-Trimethylbenzene", "Isopropylbenzene", "Styrene", "1,2,3-Trimethylbenzene", "Wind Speed-Resultant", "Wind Direction-Resultant")]
+```
+```{r}
+summary(Round1_VOC)
+nrow(Round1_VOC)
+```
+```{r}
+colMeans(Round1_VOC[, c(2:14)], na.rm = TRUE)
+```
+```{r}
+summary(Round2_VOC)
+nrow(Round2_VOC)
+```
+```{r}
+colMeans(Round2_VOC[, c(2:14)], na.rm = TRUE)
+```
+```{r}
+summary(Round3_VOC)
+nrow(Round3_VOC)
+```
+```{r}
+colMeans(Round3_VOC[, c(2:14)], na.rm = TRUE)
+```
+#TCEQ Data Compared to All of the Tubes
+```{r}
+Round1_VOC_benzene <- Round1_VOC[!is.na(Round1_VOC$Benzene),]
+ggplot(Round1_VOC_benzene, aes(x=datetime, y=Benzene)) + geom_point() + theme_classic() + geom_hline(yintercept=mean(Round1_VOC_benzene$Benzene), linetype="solid", color = "red") + ggtitle("Round 1: TCEQ Monitor Benzene over Time and Tube Results") + geom_hline(yintercept=0.305, linetype="dashed", color = "blue")+ theme(text=element_text(family="Garamond", size=14)) + xlab("Date") + ylab("Benzene (ppb)")
+```
+```{r}
+Round1_VOC_toluene <- Round1_VOC[!is.na(Round1_VOC$Toluene),]
+ggplot(Round1_VOC_toluene, aes(x=datetime, y=Toluene)) + geom_point() + theme_classic()+ geom_hline(yintercept=mean(Round1_VOC_toluene$Toluene), linetype="solid", color = "red") + ggtitle("Round 1:TCEQ Monitor Toluene over Time and Tube Results") + geom_hline(yintercept=0.245, linetype="dashed", color = "blue")+ theme(text=element_text(family="Garamond", size=14)) + xlab("Date") + ylab("Toluene (ppb)")
+```
+```{r}
+Round2_VOC_benzene <- Round2_VOC[!is.na(Round2_VOC$Benzene),]
+ggplot(Round2_VOC_benzene, aes(x=datetime, y=Benzene)) + geom_point() + theme_classic() + geom_hline(yintercept=mean(Round1_VOC_benzene$Benzene), linetype="solid", color = "red") + ggtitle("Round 2: TCEQ Monitor Benzene over Time and Tube Results") + geom_hline(yintercept=0.253, linetype="dashed", color = "blue")+ theme(text=element_text(family="Garamond", size=14))+ xlab("Date") + ylab("Benzene (ppb)")
+```
+```{r}
+Round2_VOC_toluene <- Round2_VOC[!is.na(Round2_VOC$Toluene),]
+ggplot(Round2_VOC_toluene, aes(x=datetime, y=Toluene)) + geom_point() + theme_classic()+ geom_hline(yintercept=0.194, linetype="solid", color = "red") + ggtitle("Round 2:TCEQ Monitor Toluene over Time and Tube Results") + geom_hline(yintercept=0.203, linetype="dashed", color = "blue")+ theme(text=element_text(family="Garamond", size=14))+ xlab("Date") + ylab("Toluene (ppb)")
+```
+```{r}
+Round3_VOC_benzene <- Round3_VOC[!is.na(Round3_VOC$Benzene),]
+ggplot(Round3_VOC_benzene, aes(x=datetime, y=Benzene)) + geom_point() + theme_classic() + geom_hline(yintercept=mean(Round3_VOC_benzene$Benzene), linetype="solid", color = "red") + ggtitle("Round 3: TCEQ Monitor Benzene over Time and Tube Results") + geom_hline(yintercept=0.196, linetype="dashed", color = "blue") + theme(text=element_text(family="Garamond", size=14))+ xlab("Date") + ylab("Benzene (ppb)")
+```
+```{r}
+Round3_VOC_toluene <- Round3_VOC[!is.na(Round3_VOC$Toluene),]
+ggplot(Round3_VOC_toluene, aes(x=datetime, y=Toluene)) + geom_point() + theme_classic()+ geom_hline(yintercept=mean(Round3_VOC_toluene$Toluene), linetype="solid", color = "red") + ggtitle("Round 3:TCEQ Monitor Toluene over Time and Tube Results") + geom_hline(yintercept=0.361, linetype="dashed", color = "blue")+ theme(text=element_text(family="Garamond", size=14))+ xlab("Date") + ylab("Toluene (ppb)")
+```
+

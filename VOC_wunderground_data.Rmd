@@ -1,0 +1,351 @@
+---
+title: "Weather Underground Web Scraper"
+author: "Lourdes Vera"
+date: "2/13/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#each line installs a package that will be needed to scrape the data
+#install.packages('tidyverse')
+#install.packages('rvest')
+#install.packages('datetime')
+#install.packages('vctrs')
+```
+```{r}
+#Load the packages you installed
+library(tidyverse)
+library(datetime)
+library(rvest)
+library(vctrs)
+```
+#Create Dataframe of Dates
+```{r}
+#this is the list of days where you sampled data
+data <- as.data.frame(c("2020-02-23", "2020-02-24", "2020-02-25", "2020-02-26", "2020-02-27", "2020-02-28", "2020-02-29", "2020-03-01", "2020-03-02", "2020-03-03", "2020-03-04", "2020-03-05", "2020-03-06", "2020-03-07", "2020-03-08", "2020-03-09","2020-03-10","2020-03-11","2020-03-12","2020-03-13","2020-03-14","2020-03-15","2020-03-16","2020-03-17","2020-03-18","2020-03-19","2020-03-20","2020-03-21","2020-03-22","2020-03-23","2020-03-24","2020-03-25","2020-03-26","2020-03-27","2020-03-28","2020-03-29","2020-03-30","2020-03-31","2020-04-01","2020-04-02","2020-04-03","2020-04-04","2020-04-05", "2020-04-06", "2020-04-07", "2020-04-08", "2020-04-09", "2020-04-10", "2020-04-11", "2020-04-12",  "2020-04-13", "2020-04-14", "2020-04-15", "2020-04-16", "2020-04-17", "2020-04-18", "2020-04-19", "2020-04-20", "2020-04-21", "2020-04-22", "2020-04-23", "2020-04-24","2020-04-25", "2020-04-26", "2020-04-27", "2020-04-28", "2020-04-29", "2020-04-30", "2020-05-01", "2020-05-02", "2020-05-03",  "2020-05-04"))
+```
+#Generate URLS
+```{r}
+#Paste each data into the URL to get a URL that directly takes you to the webpage for each day
+urls<-NA
+for (i in 1:nrow(data)){
+  urls[i] <- paste0("https://www.wunderground.com/dashboard/pws/KTXKARNE7/table/",data[i,1],"/",data[i,1],"/daily")
+}
+
+urls
+```
+#Scrape Data from Wunderground (takes a long time)
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 1:10){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 11:20){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 21:30){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 31:40){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 41:50){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 51:60){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+```{r}
+#This is the loop that goes through each URL listed above to scrape the weather data from the page
+for(i in 61:72){ #the number of URLs
+assign(paste0("DF", data[i,1]), urls[i] %>%
+read_html() %>%
+html_nodes(xpath='/html/body/app-root/app-dashboard/one-column-layout/wu-header/sidenav/mat-sidenav-container/mat-sidenav-content/div/section/section[1]/div[1]/div/section/div/div/div/lib-history/div[2]/lib-history-table/div/div/div/table') 
+%>%
+html_table(fill=TRUE))
+}
+```
+#Save Each Date as a Dataframe
+```{r}
+#Assign each set of data from the webpage to a data frame
+'DF2020-02-23' <- as.data.frame(`DF2020-02-23`)
+'DF2020-02-24' <- as.data.frame(`DF2020-02-24`) 
+'DF2020-02-25' <- as.data.frame(`DF2020-02-25`)
+'DF2020-02-26' <- as.data.frame(`DF2020-02-26`)
+'DF2020-02-27' <- as.data.frame(`DF2020-02-27`)
+'DF2020-02-28' <- as.data.frame(`DF2020-02-28`)
+'DF2020-02-29' <- as.data.frame(`DF2020-02-29`)
+'DF2020-03-01' <- as.data.frame(`DF2020-03-01`)
+'DF2020-03-02' <- as.data.frame(`DF2020-03-02`)
+'DF2020-03-03' <- as.data.frame(`DF2020-03-03`)
+'DF2020-03-04' <- as.data.frame(`DF2020-03-04`)
+'DF2020-03-05' <- as.data.frame(`DF2020-03-05`)
+'DF2020-03-06' <- as.data.frame(`DF2020-03-06`)
+'DF2020-03-07' <- as.data.frame(`DF2020-03-07`)
+'DF2020-03-08' <- as.data.frame(`DF2020-03-08`)
+'DF2020-03-09' <- as.data.frame(`DF2020-03-09`)
+'DF2020-03-10' <- as.data.frame(`DF2020-03-10`)
+'DF2020-03-11' <- as.data.frame(`DF2020-03-11`)
+'DF2020-03-12' <- as.data.frame(`DF2020-03-12`)
+'DF2020-03-13' <- as.data.frame(`DF2020-03-13`)
+'DF2020-03-14' <- as.data.frame(`DF2020-03-14`)
+'DF2020-03-15' <- as.data.frame(`DF2020-03-15`)
+'DF2020-03-16' <- as.data.frame(`DF2020-03-16`)
+'DF2020-03-17' <- as.data.frame(`DF2020-03-17`)
+'DF2020-03-18' <- as.data.frame(`DF2020-03-18`)
+'DF2020-03-19' <- as.data.frame(`DF2020-03-19`)
+'DF2020-03-20' <- as.data.frame(`DF2020-03-20`)
+'DF2020-03-21' <- as.data.frame(`DF2020-03-21`)
+'DF2020-03-22' <- as.data.frame(`DF2020-03-22`)
+'DF2020-03-23' <- as.data.frame(`DF2020-03-23`)
+'DF2020-03-24' <- as.data.frame(`DF2020-03-24`)
+'DF2020-03-25' <- as.data.frame(`DF2020-03-25`)
+'DF2020-03-26' <- as.data.frame(`DF2020-03-26`)
+'DF2020-03-27' <- as.data.frame(`DF2020-03-27`)
+'DF2020-03-28' <- as.data.frame(`DF2020-03-28`)
+'DF2020-03-29' <- as.data.frame(`DF2020-03-29`)
+'DF2020-03-30' <- as.data.frame(`DF2020-03-30`)
+'DF2020-03-31' <- as.data.frame(`DF2020-03-31`)
+'DF2020-04-01' <- as.data.frame(`DF2020-04-01`)
+'DF2020-04-02' <- as.data.frame(`DF2020-04-02`)
+'DF2020-04-03' <- as.data.frame(`DF2020-04-03`)
+'DF2020-04-04' <- as.data.frame(`DF2020-04-04`)
+'DF2020-04-05' <- as.data.frame(`DF2020-04-05`)
+'DF2020-04-06' <- as.data.frame(`DF2020-04-06`)
+'DF2020-04-07' <- as.data.frame(`DF2020-04-07`)
+'DF2020-04-08' <- as.data.frame(`DF2020-04-08`)
+'DF2020-04-09' <- as.data.frame(`DF2020-04-09`)
+'DF2020-04-10' <- as.data.frame(`DF2020-04-10`)
+'DF2020-04-11' <- as.data.frame(`DF2020-04-11`)
+'DF2020-04-12' <- as.data.frame(`DF2020-04-12`)
+'DF2020-04-13' <- as.data.frame(`DF2020-04-13`)
+'DF2020-04-14' <- as.data.frame(`DF2020-04-14`)
+'DF2020-04-15' <- as.data.frame(`DF2020-04-15`)
+'DF2020-04-16' <- as.data.frame(`DF2020-04-16`)
+'DF2020-04-17' <- as.data.frame(`DF2020-04-17`)
+'DF2020-04-18' <- as.data.frame(`DF2020-04-18`)
+'DF2020-04-19' <- as.data.frame(`DF2020-04-19`)
+'DF2020-04-20' <- as.data.frame(`DF2020-04-20`)
+'DF2020-04-21' <- as.data.frame(`DF2020-04-21`)
+'DF2020-04-22' <- as.data.frame(`DF2020-04-22`)
+'DF2020-04-23' <- as.data.frame(`DF2020-04-23`)
+'DF2020-04-24' <- as.data.frame(`DF2020-04-24`)
+'DF2020-04-25' <- as.data.frame(`DF2020-04-25`)
+'DF2020-04-26' <- as.data.frame(`DF2020-04-26`)
+'DF2020-04-27' <- as.data.frame(`DF2020-04-27`)
+'DF2020-04-28' <- as.data.frame(`DF2020-04-28`)
+'DF2020-04-29' <- as.data.frame(`DF2020-04-29`)
+'DF2020-04-30' <- as.data.frame(`DF2020-04-30`)
+'DF2020-05-01' <- as.data.frame(`DF2020-05-01`)
+'DF2020-05-02' <- as.data.frame(`DF2020-05-02`)
+'DF2020-05-03' <- as.data.frame(`DF2020-05-03`)
+'DF2020-05-04' <- as.data.frame(`DF2020-05-04`)
+```
+
+```{r}
+#add dates as data frame columns
+`DF2020-02-23`$date <- "2020-02-23"
+`DF2020-02-24`$date <- "2020-02-24"
+`DF2020-02-25`$date <- "2020-02-25"
+`DF2020-02-26`$date <- "2020-02-26"
+`DF2020-02-27`$date <- "2020-02-27"
+`DF2020-02-28`$date <- "2020-02-28"
+`DF2020-02-29`$date <- "2020-02-29"
+`DF2020-03-01`$date <- "2020-03-01"
+`DF2020-03-02`$date <- "2020-03-02"
+`DF2020-03-03`$date <- "2020-03-03"
+`DF2020-03-04`$date <- "2020-03-04"
+`DF2020-03-05`$date <- "2020-03-05"
+`DF2020-03-06`$date <- "2020-03-06"
+`DF2020-03-07`$date <- "2020-03-07"
+`DF2020-03-08`$date <- "2020-03-08"
+`DF2020-03-09`$date <- "2020-03-09"
+`DF2020-03-10`$date <- "2020-03-10"
+`DF2020-03-11`$date <- "2020-03-11"
+`DF2020-03-12`$date <- "2020-03-12"
+`DF2020-03-13`$date <- "2020-03-13"
+`DF2020-03-14`$date <- "2020-03-14"
+`DF2020-03-15`$date <- "2020-03-15"
+`DF2020-03-16`$date <- "2020-03-16"
+`DF2020-03-17`$date <- "2020-03-17"
+`DF2020-03-18`$date <- "2020-03-18"
+`DF2020-03-19`$date <- "2020-03-19"
+`DF2020-03-20`$date <- "2020-03-20"
+`DF2020-03-21`$date <- "2020-03-21"
+`DF2020-03-22`$date <- "2020-03-22"
+`DF2020-03-23`$date <- "2020-03-23"
+`DF2020-03-24`$date <- "2020-03-24"
+`DF2020-03-25`$date <- "2020-03-25"
+`DF2020-03-26`$date <- "2020-03-26"
+`DF2020-03-27`$date <- "2020-03-27"
+`DF2020-03-28`$date <- "2020-03-28"
+`DF2020-03-29`$date <- "2020-03-29"
+`DF2020-03-30`$date <- "2020-03-30"
+`DF2020-03-31`$date <- "2020-03-31"
+`DF2020-04-01`$date <- "2020-04-01"
+`DF2020-04-02`$date <- "2020-04-02"
+`DF2020-04-03`$date <- "2020-04-03"
+`DF2020-04-04`$date <- "2020-04-04"
+`DF2020-04-05`$date <- "2020-04-05"
+`DF2020-04-06`$date <- "2020-04-06"
+`DF2020-04-07`$date <- "2020-04-07"
+`DF2020-04-08`$date <- "2020-04-08"
+`DF2020-04-09`$date <- "2020-04-09"
+`DF2020-04-10`$date <- "2020-04-10"
+`DF2020-04-11`$date <- "2020-04-11"
+`DF2020-04-12`$date <- "2020-04-12"
+`DF2020-04-13`$date <- "2020-04-13"
+`DF2020-04-14`$date <- "2020-04-14"
+`DF2020-04-15`$date <- "2020-04-15"
+`DF2020-04-16`$date <- "2020-04-16"
+`DF2020-04-17`$date <- "2020-04-17"
+`DF2020-04-18`$date <- "2020-04-18"
+`DF2020-04-19`$date <- "2020-04-19"
+`DF2020-04-20`$date <- "2020-04-20"
+`DF2020-04-21`$date <- "2020-04-21"
+`DF2020-04-22`$date <- "2020-04-22"
+`DF2020-04-23`$date <- "2020-04-23"
+`DF2020-04-24`$date <- "2020-04-24"
+`DF2020-04-25`$date <- "2020-04-25"
+`DF2020-04-26`$date <- "2020-04-26"
+`DF2020-04-27`$date <- "2020-04-27"
+`DF2020-04-28`$date <- "2020-04-28"
+`DF2020-04-29`$date <- "2020-04-29"
+`DF2020-04-30`$date <- "2020-04-30"
+`DF2020-05-01`$date <- "2020-05-01"
+`DF2020-05-02`$date <- "2020-05-02"
+`DF2020-05-03`$date <- "2020-05-03"
+`DF2020-05-04`$date <- "2020-05-04"
+```
+#Build the main dataframe
+```{r}
+#combine the data frames together
+DF_All <- vctrs::vec_c(`DF2020-02-23`, 
+`DF2020-02-24`,
+`DF2020-02-25`,
+`DF2020-02-26`,
+`DF2020-02-27`,
+`DF2020-02-28`,
+`DF2020-02-29`,
+`DF2020-03-01`,
+`DF2020-03-02`,
+`DF2020-03-03`,
+`DF2020-03-04`,
+`DF2020-03-05`,
+`DF2020-03-06`,
+`DF2020-03-07`,
+`DF2020-03-08`,
+`DF2020-03-09`,
+`DF2020-03-10`,
+`DF2020-03-11`,
+`DF2020-03-12`,
+`DF2020-03-13`,
+`DF2020-03-14`,
+`DF2020-03-15`,
+`DF2020-03-16`,
+`DF2020-03-17`,
+`DF2020-03-18`,
+`DF2020-03-19`,
+`DF2020-03-20`,
+`DF2020-03-21`,
+`DF2020-03-22`,
+`DF2020-03-23`,
+`DF2020-03-24`,
+`DF2020-03-25`,
+`DF2020-03-26`,
+`DF2020-03-27`,
+`DF2020-03-28`,
+`DF2020-03-29`,
+`DF2020-03-30`,
+`DF2020-03-31`,
+`DF2020-04-01`,
+`DF2020-04-02`,
+`DF2020-04-03`,
+`DF2020-04-04`,
+`DF2020-04-05`,
+`DF2020-04-06`,
+`DF2020-04-07`,
+`DF2020-04-08`,
+`DF2020-04-09`,
+`DF2020-04-10`,
+`DF2020-04-11`,
+`DF2020-04-12`,
+`DF2020-04-13`,
+`DF2020-04-14`,
+`DF2020-04-15`,
+`DF2020-04-16`,
+`DF2020-04-17`,
+`DF2020-04-18`,
+`DF2020-04-19`,
+`DF2020-04-20`,
+`DF2020-04-21`,
+`DF2020-04-22`,
+`DF2020-04-23`,
+`DF2020-04-24`,
+`DF2020-04-25`,
+`DF2020-04-26`,
+`DF2020-04-27`,
+`DF2020-04-28`,
+`DF2020-04-29`,
+`DF2020-04-30`,
+`DF2020-05-01`,
+`DF2020-05-02`,
+`DF2020-05-03`,
+`DF2020-05-04`)
+```
+```{r}
+#check out your new data frame. Make sure the dates are in there.
+DF_All
+```
+```{r}
+write.csv(DF_All, "DF_All.csv")
+```
+
+
+
+
+

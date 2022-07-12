@@ -1,0 +1,167 @@
+---
+title: "Weather Underground Data Analysis and Wind Roses"
+author: "Lourdes Vera"
+date: "2/15/2021"
+output: word_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Load the packages you installed
+library(tidyverse)
+library(datetime)
+library(rvest)
+library(vctrs)
+```
+
+```{r}
+df <- read.csv("DF_All.csv")
+```
+
+#Format date and time
+```{r}
+#format the date and time
+df$Date <- as.date(df$date)
+
+df$Time2 <- format(strptime(df$Time, "%I:%M %p"), format = "%H:%M:%S")
+```
+
+```{r}
+#concatenate date and time
+df$Datetime <- paste0(df$Date, " ", df$Time2)
+```
+```{r}
+df$Datetime <- as.POSIXct(df$Datetime, format="%Y-%m-%d%H:%M", tz = "America/Chicago")
+```
+```{r}
+df$Datetime <- round(df$Datetime, "hours")
+```
+
+#Format Weather Data
+```{r}
+#temperature
+df$Temperature <- str_sub(df$Temperature, start=1, end=4)
+df$Temperature <- as.numeric(df$Temperature)
+#humidity
+df$Humidity <- str_sub(df$Humidity, start=1, end=2)
+df$Humidity <- as.numeric(df$Humidity)
+#windspeed
+df$ws <- str_sub(df$Speed, end=-5)
+df$ws <- str_trim(df$ws)
+df$ws <- as.numeric(df$ws)
+```
+#Keep complete data
+```{r}
+df$Datetime <- as.POSIXct(df$Datetime , format="%Y-%m-%d%H:%M")
+```
+#
+
+```{r}
+#Wind direction
+df$WindNumber <- NA
+df[which(df$Wind == "East"),c("WindNumber")] <- 90
+df[which(df$Wind == "West"),c("WindNumber")] <- 270
+df[which(df$Wind == "WNW"),c("WindNumber")] <- 292.5
+df[which(df$Wind == "NW"),c("WindNumber")] <- 315
+df[which(df$Wind == "North"),c("WindNumber")] <- 0
+df[which(df$Wind == "NE"),c("WindNumber")] <- 45
+df[which(df$Wind == "ENE"),c("WindNumber")] <- 67.5
+df[which(df$Wind == "South"),c("WindNumber")] <- 180
+df[which(df$Wind == "SE"),c("WindNumber")] <- 135
+df[which(df$Wind == "SSE"),c("WindNumber")] <- 157.5
+df[which(df$Wind == "SSW"),c("WindNumber")] <- 202.5
+df[which(df$Wind == "ESE"),c("WindNumber")] <- 112.5
+df[which(df$Wind == "WSW"),c("WindNumber")] <- 247.5
+df[which(df$Wind == "NNE"),c("WindNumber")] <- 22.5
+df[which(df$Wind == "NNW"),c("WindNumber")] <- 337.5
+df[which(df$Wind == "SW"),c("WindNumber")] <- 225
+
+#make wind direction numeric
+df$wd <- as.numeric(df$WindNumber)
+```
+
+```{r}
+dfwinddatetime <- df %>% group_by(Datetime) %>%
+  summarise(mean = mean(wd, na.rm = TRUE), ws = mean(ws, na.rm = TRUE))
+```
+
+```{r}
+#Wind direction
+dfwinddatetime$Wind <- "NA"
+dfwinddatetime[which(dfwinddatetime$mean >= 0 & dfwinddatetime$mean < 22.5| dfwinddatetime$mean >= 337.5 & dfwinddatetime$mean <= 360),c("Wind")] <- "North"
+dfwinddatetime[which(dfwinddatetime$mean >= 22.5 & dfwinddatetime$mean < 67.5),c("Wind")] <- "Northeast"
+dfwinddatetime[which(dfwinddatetime$mean >= 67.5 & dfwinddatetime$mean < 112.5),c("Wind")] <- "East"
+dfwinddatetime[which(dfwinddatetime$mean >= 112.5 & dfwinddatetime$mean < 157.5),c("Wind")] <- "Southeast"
+dfwinddatetime[which(dfwinddatetime$mean >= 157.5 & dfwinddatetime$mean < 202.5),c("Wind")] <- "South"
+dfwinddatetime[which(dfwinddatetime$mean >= 202.5 & dfwinddatetime$mean < 247.5),c("Wind")] <- "Southwest"
+dfwinddatetime[which(dfwinddatetime$mean >= 247.5 & dfwinddatetime$mean < 292.5),c("Wind")] <- "West"
+dfwinddatetime[which(dfwinddatetime$mean >= 292.5 & dfwinddatetime$mean < 337.5),c("Wind")] <- "Northwest"
+```
+
+```{r}
+write.csv(dfwinddatetime, "dfwinddatetime_VOC.csv")
+```
+
+#format dates and times again
+```{r}
+dfwinddatetime$Datetime <- as.POSIXct(dfwinddatetime$Datetime , format="%Y-%m-%d%H:%M")
+
+```
+
+
+```{r}
+library(openair)
+```
+```{r}
+df <- dfwinddatetime
+df<- df[complete.cases(df),]
+df$Datetime <- as.POSIXct(df$Datetime)
+```
+
+#SEPARATE ROUNDS
+```{r}
+#round2
+round2 <- df[df$Datetime>="2020-02-23 10:22:00" & df$Datetime<="2020-03-01 15:18:00",]
+#round 3
+round3 <- df[df$Datetime>="2020-04-05 12:00:00" & df$Datetime<="2020-04-12 16:35:00",]
+#round 4
+round4 <- df[df$Datetime>="2020-04-25 09:56:00" & df$Datetime<="2020-05-02 08:32:59",]
+```
+
+#Weather Round 1
+```{r}
+windRose(round2, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA,
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text
+  = TRUE, breaks = 6, offset = 10, normalise = FALSE, max.freq =
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph",
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic =
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale =
+  315, border = NA)
+```
+#Weather Round 2
+```{r}
+windRose(round3, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA, 
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 6, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+```
+#Weather Round 3
+```{r}
+windRose(round4, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA, 
+  ws.int = 3, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 6, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = NULL, annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+```

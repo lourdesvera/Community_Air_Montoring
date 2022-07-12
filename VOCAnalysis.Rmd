@@ -1,0 +1,285 @@
+---
+title: "Volatile Organic Compound (VOC) Analysis and Visualizations for Omniscent Data"
+author: "Lourdes Vera"
+output: word_document
+editor_options: 
+  chunk_output_type: inline
+---
+**The VOC data used in this script are from the Omniscent monitor and include benzene and toluene. They do not contain low confidence or false measurements.**
+
+**The wind data, including windspeed and wind direction, were obtained using the Weather Underground webscraper, which can be found here: X** 
+
+# Set Up
+```{r setup, include=FALSE}
+#Set up the R markdown file to allow it to "knit" into a document
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Load Libraries
+```{r}
+library(datetime)
+library(lubridate)
+library(ggplot2)
+library(openair)
+library(tidyverse)
+library(showtext)
+```
+## Load Data
+```{r}
+benzene <- read.csv("Omniscent_Data - Benzene.csv", stringsAsFactors = FALSE)
+toluene <- read.csv("Omniscent_Data - Toluene.csv", stringsAsFactors = FALSE)
+wind <- read.csv("dfwinddatetime_VOC.csv")
+```
+# Benzene Analysis
+## Convert timestamps into datetime format in the benzene and wind datasets
+```{r}
+#Convert vector into characters
+benzene$Datetime <- as.character(benzene$startTimestamp)
+wind$Datetime <- as.character(wind$Datetime)
+```
+```{r}
+#Convert vector of characters into POSIXct
+benzene$Datetime <- as.POSIXct(benzene$startTimestamp, format="%Y-%m-%d%H:%M")
+benzene$Datetime[1:6]
+
+wind$Datetime <- as.POSIXct(wind$Datetime, format="%Y-%m-%d%H:%M")
+wind$Datetime[1:6]
+```
+```{r}
+#get rid of timezone 
+strip.tz <- function(dt) {
+  fmt <- "%Y-%m-%d %H:%M:%S"
+  strptime(strftime(dt, format = fmt, tz=""), format = fmt, tz="UTC")
+}
+
+benzene$Datetime <- strip.tz(benzene$Datetime)
+wind$Datetime <- strip.tz(wind$Datetime)
+```
+```{r}
+#Look to see if it worked
+str(benzene$Datetime)
+str(wind$Datetime)
+```
+### Round datetime in VOC data to hours
+*We are doing this in order to match the benzene data with the wind data*
+```{r}
+#Round the benzene datetime to hours
+benzene$Datetime <- round(benzene$Datetime,"hours")
+```
+```{r}
+#See if it worked
+benzene$Datetime[1:6]
+wind$Datetime[1:6]
+```
+## Merge the Benzene and Wind Data
+```{r}
+#perform the merge by datetime
+omni_wind <- merge(wind, benzene, by = 'Datetime')
+#see if it worked
+head(omni_wind)
+```
+```{r}
+#make sure Datetime stays in POSIXct format
+omni_wind$Datetime <- as.POSIXct(omni_wind$Datetime, format="%Y-%m-%d%H:%M")
+```
+### Add tube average to the data frame for reference
+```{r}
+#add in tube average to make a reference line
+omni_wind$tube_average_round2 <- NA
+omni_wind[which(omni_wind$Datetime >="2020-04-05 15:39:34" & omni_wind$Datetime<="2020-04-12 16:35:45"),c("tube_average_round2")] <- 0.203
+
+omni_wind$tube_average_round3 <- NA
+omni_wind[which(omni_wind$Datetime>="2020-04-25 11:01:42" & omni_wind$Datetime<="2020-05-02 05:41:04"),c("tube_average_round3")] <- 0.196
+
+#Note: this can also just be added as a line in the graph
+```
+## Get rid of NAs for Windspeed
+```{r}
+omni_wind <- omni_wind %>% drop_na(mean, ws)
+```
+## Delete Duplicate Rows
+```{r}
+#delete duplicate rows
+omni_wind2 <- unique( omni_wind )
+```
+## Replace NAs for Benzene with Half of the MDL 
+```{r}
+#make sure concentration is numeric
+omni_wind2$benzene_concentration_ppb <- as.numeric(omni_wind2$benzene_concentration_ppb)
+#turn "N/A" into 0.7 ppb
+omni_wind2[is.na(omni_wind2$benzene_concentration_ppb),c('benzene_concentration_ppb')] <- 0.7
+```
+## Find the Benzene Average
+```{r}
+#what is the omniscent average for benzene?
+mean(omni_wind2$benzene_concentration_ppb)
+```
+# Benzene Visualizations
+## Plot the Benzene and Wind Direction Data
+```{r}
+omni_wind2$Wind <- factor(omni_wind2$Wind, levels = c("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"))
+
+p<- ggplot(omni_wind2, aes(x = Wind, y = benzene_concentration_ppb, color=Wind)) + geom_point(aes(size=2)) +theme_classic() + ggtitle("Omniscent Benzene Concentrations over Time and Wind Direction") + xlab("Wind Direction") + ylab("Benzene Concentration (ppb)") + geom_hline(yintercept=mean(omni_wind2$benzene_concentration_ppb), linetype="solid", color = "black")+ theme(text=element_text(family="sans", size=14)) + guides(size = FALSE)+ scale_x_discrete(guide = guide_axis(angle = 45), limits = c("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"))
+p<- update_labels(p, list(colour="Benzene Concentration (ppb)"))
+p
+```
+## Plot the Benzene Data Colored According to Wind Direction
+```{r}
+p1 <- ggplot(omni_wind2, aes(Datetime, color=Measurements)) + geom_point(aes(y = benzene_concentration_ppb, color = "Omniscent" )) + geom_line(aes(y=tube_average_round2, color = "Tube Average", size=0.5)) + geom_line(aes(y=tube_average_round3, color = "Tube Average", size=0.5)) + geom_hline(yintercept= mean(omni_wind2$benzene_concentration_ppb), linetype="solid", color = "black") + theme_classic() + ggtitle("Omniscent and ATD Tube Benzene Concentrations over Time") + xlab("Date") + ylab("Benzene Concentration (ppb)") + guides(size = FALSE) 
+
+p1+ labs(fill ="Legend")+ theme(text=element_text(family="sans", size=14))
+```
+## Benzene Wind Rose
+### Create Wind Rose for All Benzene Measurements
+```{r}
+omni_wind2$wd <- omni_wind2$mean
+
+windRose(omni_wind2, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA, 
+  ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 4, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = 'benzene_concentration_ppb', annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+pollutionRose(omni_wind2, pollutant = "benzene_concentration_ppb", key.footer = "Benzene Concentration (ppb)")
+```
+### Create Wind Rose for All Benzene Measurements over 1.4 ppb
+```{r}
+
+omni_wind3 <- omni_wind2[which((omni_wind2$benzene_concentration_ppb) > 1.4),]
+
+windRose(omni_wind3, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA, 
+  ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 3, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = 'benzene_concentration_ppb', annotate = TRUE, angle.scale = 
+  315, border = NA)
+```
+### Create Pollution Rose for All Benzene Measurements over 1.4 ppb
+```{r}
+pollutionRose(omni_wind3, pollutant = "benzene_concentration_ppb", key.footer = "Benzene Concentration (ppb)", main = "Benzene Measurements over 1.4 ppb and Wind Direction")
+```
+
+# Benzene Analysis
+## Convert timestamps into datetime format in the benzene and wind datasets
+```{r}
+toluene$Datetime <- as.character(toluene$startTimestamp)
+wind$Datetime <- as.character(wind$Datetime)
+```
+```{r}
+toluene$Datetime <- as.POSIXct(toluene$startTimestamp, format="%Y-%m-%d%H:%M")
+toluene$Datetime[1:6]
+
+wind$Datetime <- as.POSIXct(wind$Datetime, format="%Y-%m-%d%H:%M")
+wind$Datetime[1:6]
+```
+```{r}
+#get rid of timezone 
+strip.tz <- function(dt) {
+  fmt <- "%Y-%m-%d %H:%M:%S"
+  strptime(strftime(dt, format = fmt, tz=""), format = fmt, tz="UTC")
+}
+
+toluene$Datetime <- strip.tz(toluene$Datetime)
+wind$Datetime <- strip.tz(wind$Datetime)
+```
+```{r}
+str(toluene$Datetime)
+str(wind$Datetime)
+```
+### Round datetime in VOC data to hours
+*We are doing this in order to match the benzene data with the wind data*
+```{r}
+toluene$Datetime <- round(toluene$Datetime,"hours")
+```
+```{r}
+toluene$Datetime[1:6]
+wind$Datetime[1:6]
+```
+## Merge the Benzene and Wind Data 
+```{r}
+omni_windt <- merge(wind, toluene, by = 'Datetime')
+head(omni_windt)
+```
+```{r}
+#make sure Datetime stays in POSIXct format
+omni_windt$Datetime <- as.POSIXct(omni_windt$Datetime, format="%Y-%m-%d%H:%M")
+```
+```{r}
+#add in tube averages
+omni_windt$tube_average_round2 <- NA
+omni_windt[which(omni_windt$Datetime >="2020-04-05 15:39:34" & omni_windt$Datetime<="2020-04-12 16:35:45"),c("tube_average_round2")] <- 0.203
+
+omni_windt$tube_average_round3 <- NA
+omni_windt[which(omni_windt$Datetime>="2020-04-25 11:01:42" & omni_windt$Datetime<="2020-05-02 05:41:04"),c("tube_average_round3")] <- 0.361
+```
+```{r}
+omni_windt <- omni_windt %>% drop_na(mean, ws)
+```
+
+
+```{r}
+#delete duplicate rows
+omni_windt2 <- unique( omni_windt )
+#make sure toluene concentration is numeric
+omni_windt2$toluene_Concentration..ppb. <- as.numeric(omni_windt2$toluene_Concentration..ppb.)
+#turn "N/A" into 1/2 MDL
+omni_windt2[is.na(omni_windt2$toluene_Concentration..ppb.),c('toluene_Concentration..ppb.')] <- 0.2
+
+```
+```{r}
+#what is the omniscent average for toluene?
+mean(omni_windt2$toluene_Concentration..ppb.)
+``` 
+
+```{r}
+ggplot(omni_windt2, aes(x = Datetime, y = toluene_Concentration..ppb., color=Wind)) + geom_point(aes(size=2)) +theme_classic() + ggtitle("Omniscent Toluene Concentrations over Time and Wind Direction") + xlab("Date") + ylab("Toluene Concentration (ppb)") + geom_hline(yintercept=mean(omni_windt2$toluene_Concentration..ppb..with.MDL), linetype="solid", color = "black")+ theme(text=element_text(family="sans", size=14)) + guides(size = FALSE)+ scale_color_manual(values = c("East" = "#450acb","North"="#2e0787", "Northeast"="#3908a9", "Northwest"="steelblue", "South"="#6729f3", "Southeast"="#500ced", "Southwest"="#7f4bf5", "West"="#976df7"))
+```
+```{r}
+omni_windt2$Wind <- factor(omni_windt2$Wind, levels = c("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"))
+
+legend_title <- "OMG My Title"
+
+p<- ggplot(omni_windt2, aes(x = Wind, y = toluene_Concentration..ppb., color=Wind)) + geom_point(aes(size=2)) +theme_classic() + ggtitle("Omniscent Toluene Concentrations over Time and Wind Direction") + xlab("Wind Direction") + ylab("Toluene Concentration (ppb)") + geom_hline(yintercept=mean(omni_windt2$toluene_Concentration..ppb..with.MDL), linetype="solid", color = "black")+ theme(text=element_text(family="sans", size=14)) + guides(size = FALSE)+ scale_x_discrete(guide = guide_axis(angle = 45), limits = c("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"))
+p<- update_labels(p, list(colour="Toluene Concentration (ppb)"))
+p
+```
+
+```{r}
+ggplot(omni_windt2, aes(Datetime, color=Measurements)) + geom_point(aes(y = toluene_Concentration..ppb., color = "Omniscent")) + geom_line(aes(y=tube_average_round2, color = "Tube Average", size=0.5)) + geom_line(aes(y=tube_average_round3, color = "Tube Average", size=0.5)) + theme_classic() + ggtitle("Omniscent and ATD Tube Benzene Concentrations over Time") + xlab("Date") + ylab("Toluene Concentration (ppb)") + guides(size = FALSE)+ geom_hline(yintercept=mean(omni_windt2$toluene_Concentration..ppb..with.MDL), linetype="solid", color = "black")+ theme(text=element_text(family="sans", size=14))
+```
+
+```{r}
+omni_windt2$wd <- omni_windt2$mean
+windRose(omni_windt2, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA, 
+  ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 4, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = 'toluene_Concentration..ppb.', annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+pollutionRose(omni_windt2, pollutant = "toluene_Concentration..ppb.", key.footer = "Toluene Concentration (ppb)")
+```
+
+```{r}
+omni_windt3 <- omni_windt2[which((omni_windt2$toluene_Concentration..ppb..with.MDL) > 0.4),]
+
+windRose(omni_windt3, ws = "ws", wd = "mean", ws2 = NA, wd2 = NA, 
+  ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+  = "default", grid.line = NULL, width = 1, seg = NULL, auto.text 
+  = TRUE, breaks = 4, offset = 10, normalise = FALSE, max.freq = 
+  NULL, paddle = TRUE, key.header = NULL, key.footer = "mph", 
+  key.position = "bottom", key = TRUE, dig.lab = 5, statistic = 
+  "prop.count", pollutant = 'toluene_Concentration..ppb.', annotate = TRUE, angle.scale = 
+  315, border = NA)
+
+pollutionRose(omni_windt3, pollutant = "toluene_Concentration..ppb.", key.footer = "Toluene Concentration (ppb)", main = "Positive Toluene Concentrations and Wind Direction")
+```
+
+
+
