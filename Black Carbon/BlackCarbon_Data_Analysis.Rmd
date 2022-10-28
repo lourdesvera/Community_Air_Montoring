@@ -4,6 +4,13 @@ author: "Lourdes Vera"
 date: "4/1/2021"
 output: html_document
 ---
+* Lourdes- troubleshoot and make it work
+* See what each line does
+* Make it clean and nice
+*Add description for each chunk about what it does
+*Put on GitHub with ReadMe
+Dream to do:
+* convert this into python
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -16,7 +23,7 @@ library(openair)
 ```
 
 ```{r}
-weather <- read.csv("dfwinddatetime_BlackCarbon.csv", stringsAsFactors = FALSE)
+weather <- read.csv("dfwinddatetime.csv", stringsAsFactors = FALSE)
 df <- read.csv("OutdoorResults.csv", stringsAsFactors = FALSE)
 ```
 ```{r}
@@ -31,10 +38,10 @@ str(df)
 
 
 ```{r}
-df$Datetime <- as.POSIXct(df$TimeStamp, format="%m/%d/%Y%H:%M")
-df$Datetime[1:6]
+df$Datetime2 <- as.POSIXct(df$TimeStamp, format="%m/%d/%Y%H:%M")
+df$Datetime2[1:6]
 
-weather$Datetime <- as.POSIXct(weather$Datetime, format="%Y-%m-%d%H:%M")
+weather$Datetime <- as.POSIXct(weather$DF_All.Datetime, format="%m/%d/%Y%H:%M")
 weather$Datetime[1:6]
 ```
 ```{r}
@@ -64,7 +71,7 @@ weather$Datetime[1:6]
 bc <- merge(weather, df, by = 'Datetime')
 ```
 ```{r}
-bc$Datetime <- as.POSIXct(bc$Datetime, format="%Y-%m-%d%H:%M")
+bc$Datetime <- as.POSIXct(bc$Datetime, format="%m/%d/%Y%H:%M")
 ```
 ```{r}
 head(bc)
