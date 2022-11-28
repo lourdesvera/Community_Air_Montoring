@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+#import libraries and install packages
+library(openair)
+library(lubridate)
+```
+
+```{r}
+#Import data
+ad_summer2019 <- read.csv2("https://raw.githubusercontent.com/lourdesvera/Community_Air_Montoring/master/Wind_Analyses/Armourdale_10yrs.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE )
+armourdale
+```
+
+```{r}
+#rename columns
+colnames(ad_summer2019) = c("Year", "Month", "Day", "Temperature", "ws", "wd")
+```
+
+```{r}
+#change some column formats
+ad_summer2019$Temperature <- as.numeric(ad$Temperature)
+ad_summer2019$ws <- as.numeric(ad$ws)
+ad_summer2019$wd <- as.numeric(ad$wd)
+```
+
+```{r}
+#Concatenate day, month, year and convert that column into date/time format
+ad_summer2019$date <- make_date(year = ad_summer2019$Year, month = ad_summer2019$Month , day = ad_summer2019$Day)
+head(ad_summer2019$date)
+```
+
+```{r}
+library(weathermetrics)
+#Convert Celsius to Fahrenheit
+ad_summer2019$Temperature <- celsius.to.fahrenheit(ad$Temperature, round = 2)
+```
+
+```{r}
+ad_summer2019 <- selectByDate(ad_summer2019, start = "2019-06-21", end = "2019-09-22")
+```
+
+
+```{r}
+summary(ad_summer2019)
+```
+
+```{r}
+str(ad_summer2019)
+```
+
+```{r}
+nrow(ad_summer2019)
+View(ad_summer2019)
+```
+
+```{r}
+#prep for wind rose
+ad_wr <- ad_summer2019[,c("ws", "wd")]
+```
+
+```{r}
+windRose(ad_wr)
+```
+
+```{r}
+windRose(ad_wr, ws = "ws", wd = "wd",breaks=c(0, 2, 5,8, 11, 17), auto.text=FALSE, paddle=FALSE, annotate=FALSE, grid.line=5, key = list(labels = c(">0-2", ">2-5", ">5-8", ">8-11", ">11-17")), key.footer = "Summer 2019 Wind Speed Plot in Armourdale, KS (m/s)", key.position = "bottom",par.settings=list(axis.line=list(col="lightgray")), col = c("#4f4f4f", "#0a7cb9", "#f9be00", "#ff7f2f", "#d7153a"))
+```
+
