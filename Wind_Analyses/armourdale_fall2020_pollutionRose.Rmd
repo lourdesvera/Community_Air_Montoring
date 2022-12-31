@@ -1,0 +1,74 @@
+---
+title: "R Notebook"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+#Import libraries and install packages
+library(openair)
+library(lubridate)
+```
+
+```{r}
+#Import Data
+pr_fall2020 <- read.csv2("https://raw.githubusercontent.com/lourdesvera/Community_Air_Montoring/master/Wind_Analyses/Wind%20Pollution%202%20yrs.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
+pr_fall2020
+```
+
+```{r}
+#rename column names
+colnames(pr_fall2020) = c("date", "PM2.5", "ws", "wd")
+```
+
+```{r}
+#convert all variables to "numeric" since they are in "character"
+pr_fall2020$PM2.5 <- as.numeric(as.character(pr_fall2020$PM2.5))
+pr_fall2020$date <- as.Date(as.character(pr_fall2020$date))
+pr_fall2020$ws <- as.numeric(as.character(pr_fall2020$ws))
+pr_fall2020$wd <- as.numeric(as.character(pr_fall2020$wd))
+```
+
+```{r}
+pr_fall2020 <- selectByDate(pr_fall2020, start = "2020-10-14", end = "2020-12-20")
+```
+
+```{r}
+summary(pr_fall2020)
+```
+
+```{r}
+str(pr_fall2020)
+```
+
+```{r}
+View(pr_fall2020)
+```
+
+```{r}
+#get classes of all columns
+sapply(pr_fall2020, class)
+```
+
+```{r}
+summary(pr_fall2020)
+```
+
+```{r}
+#Prep for pollution rose
+ad_pr <- pr_fall2020[,c("ws", "wd", "PM2.5")]
+```
+
+```{r}
+pollutionRose(ad_pr, ws = "ws", wd = "wd", pollutant = "PM2.5", breaks = c(0,50,100,200, 350, 500), auto.text = FALSE, paddle = FALSE, annotate = FALSE, grid.line = 5, key = list(labels = c(">0-50", ">50-100", ">100-200", ">200-350", ">350-500")), key.footer = "Fall 2020 PM2.5 Plot in Armourdale, KS (ug/m^3)", key.position = "bottom", par.settings=list(axis.line=list(col="lightgray")), col = c("#4f4f4f", "#0a7cb9", "#f9be00", "#ff7f2f", "#d7153a"))
+```
